@@ -1,0 +1,9 @@
+build/
+nbproject/private
+test/
+dist
+.classpath
+.settings
+.project
+.class
+*.zip
