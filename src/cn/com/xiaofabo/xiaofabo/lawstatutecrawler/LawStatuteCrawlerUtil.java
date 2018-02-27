@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package lawstatutecrawler;
+package cn.com.xiaofabo.xiaofabo.lawstatutecrawler;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -17,13 +17,13 @@ import org.jsoup.nodes.Element;
  *
  * @author 陈光曦
  */
-public class LawStatute {
+public class LawStatuteCrawlerUtil {
 
     private final String url;
     private String title;
     private String content;
 
-    public LawStatute(String url) {
+    public LawStatuteCrawlerUtil(String url) {
         this.url = url;
     }
 
