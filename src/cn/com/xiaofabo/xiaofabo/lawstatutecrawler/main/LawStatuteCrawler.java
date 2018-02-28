@@ -3,8 +3,12 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package cn.com.xiaofabo.xiaofabo.lawstatutecrawler;
+package cn.com.xiaofabo.xiaofabo.lawstatutecrawler.main;
 
+import cn.com.xiaofabo.xiaofabo.laowstatutecrawler.entity.LawStatute;
+import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.InterpretationCrawlerUtil;
+import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.LawStatuteAnalyzer;
+import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.LawStatuteCrawlerUtil;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -24,44 +28,37 @@ public class LawStatuteCrawler {
      * @param args the command line arguments
      */
     public static void main(String[] args) throws IOException {
-//        crawl();
-        LawStatuteAnalyzer analyzer = new LawStatuteAnalyzer();
-        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data");
-        List fileList = analyzer.getFileList();
-        StringBuilder csvString = new StringBuilder();
-        for (int i = 0; i < fileList.size(); ++i) {
-            String filePath = (String) fileList.get(i);
-            LawStatute statute = analyzer.analyze(filePath);
-            String name = analyzer.getName(filePath);
-            for (int j = 0; j < statute.getItemList().size(); ++j) {
-                String indexStr = name + "第" + (j + 1) + "条";
-                String content = statute.getItemList().get(j).getContent();
-                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
-            }
-        }
-        
-        try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\dataset.csv")) {
-            out.println(csvString.toString());
-        }catch(FileNotFoundException e){
-            System.err.println("Write to file error!");
-        }
-//        LawStatute statute = analyzer.analyze("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\民法商法\\中华人民共和国海商法.txt");
-//        for(int i = 0; i < statute.getItemList().size(); ++i){
-//            System.out.println("Item " + i + ": " + statute.getItemList().get(i).getContent());
-//        }
+//        crawlLawStatute();
+//        gen4paraCsv();
+        crawlInterpretation();
     }
 
-    public static int crawl() throws IOException {
-//        List<String> constitution = new LinkedList<>();
-//        List<String> constitutionRelated = new LinkedList<>();
-//        List<String> civilBusiness = new LinkedList<>();
-//        List<String> administrative = new LinkedList<>();
-//        List<String> economic = new LinkedList<>();
-//        List<String> social = new LinkedList<>();
-//        List<String> penal = new LinkedList<>();
-//        List<String> lawsuit = new LinkedList<>();
-//        List<String> interpretation = new LinkedList<>();
-//        
+    public static int crawlInterpretation() throws IOException {
+        List<String> indexList = new LinkedList<>();
+        String baseUrl = "http://www.court.gov.cn/fabu-gengduo-16.html";
+        indexList.add(baseUrl);
+        for (int i = 2; i <= 12; ++i) {
+            indexList.add(baseUrl + "?page=" + i);
+        }
+
+        for (int i = 0; i < indexList.size(); ++i) {
+            String url = indexList.get(i);
+            Document doc = Jsoup.connect(url).get();
+            Element divElement = doc.getElementsByClass("sec_list").get(0);
+            Element ulElement = divElement.children().select("ul").get(0);
+            List<Element> linkList = ulElement.select("a");
+            for (int j = 0; j < linkList.size(); ++j) {
+                Element link = linkList.get(j);
+                String interUrl = "http://www.court.gov.cn" + link.attr("href");
+                InterpretationCrawlerUtil interUtil = new InterpretationCrawlerUtil(interUrl);
+                interUtil.retrieveInfo();
+                interUtil.writeFile("data/司法解释");
+            }
+        }
+        return 0;
+    }
+
+    public static int crawlLawStatute() throws IOException {
         List<String> indexList = new LinkedList<>();
         indexList.add("http://jlfxhw.com/flxf/index.jhtml");    ///宪法
         indexList.add("http://jlfxhw.com/flxgf/index.jhtml");   ///宪法相关法
@@ -145,4 +142,30 @@ public class LawStatuteCrawler {
         return 0;
     }
 
+    public static void gen4paraCsv() {
+        LawStatuteAnalyzer analyzer = new LawStatuteAnalyzer();
+        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data");
+        List fileList = analyzer.getFileList();
+        StringBuilder csvString = new StringBuilder();
+        for (int i = 0; i < fileList.size(); ++i) {
+            String filePath = (String) fileList.get(i);
+            LawStatute statute = analyzer.analyze(filePath);
+            String name = analyzer.getName(filePath);
+            for (int j = 0; j < statute.getItemList().size(); ++j) {
+                String indexStr = name + "第" + (j + 1) + "条";
+                String content = statute.getItemList().get(j).getContent();
+                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
+            }
+        }
+
+        try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\dataset.csv")) {
+            out.println(csvString.toString());
+        } catch (FileNotFoundException e) {
+            System.err.println("Write to file error!");
+        }
+//        LawStatute statute = analyzer.analyze("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\民法商法\\中华人民共和国海商法.txt");
+//        for(int i = 0; i < statute.getItemList().size(); ++i){
+//            System.out.println("Item " + i + ": " + statute.getItemList().get(i).getContent());
+//        }
+    }
 }

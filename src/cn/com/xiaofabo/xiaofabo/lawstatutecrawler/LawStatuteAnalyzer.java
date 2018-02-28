@@ -5,6 +5,8 @@
  */
 package cn.com.xiaofabo.xiaofabo.lawstatutecrawler;
 
+import cn.com.xiaofabo.xiaofabo.laowstatutecrawler.entity.StatuteItem;
+import cn.com.xiaofabo.xiaofabo.laowstatutecrawler.entity.LawStatute;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
