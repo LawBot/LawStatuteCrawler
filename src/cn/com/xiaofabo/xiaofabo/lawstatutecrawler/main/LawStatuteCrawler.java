@@ -5,10 +5,13 @@
  */
 package cn.com.xiaofabo.xiaofabo.lawstatutecrawler.main;
 
+import cn.com.xiaofabo.xiaofabo.laowstatutecrawler.entity.Interpretation;
 import cn.com.xiaofabo.xiaofabo.laowstatutecrawler.entity.LawStatute;
+import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.InterpretationAnalyzer;
 import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.InterpretationCrawlerUtil;
 import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.LawStatuteAnalyzer;
 import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.LawStatuteCrawlerUtil;
+import cn.com.xiaofabo.xiaofabo.lawstatutecrawler.LawItemFinder;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -29,8 +32,18 @@ public class LawStatuteCrawler {
      */
     public static void main(String[] args) throws IOException {
 //        crawlLawStatute();
-//        gen4paraCsv();
-        crawlInterpretation();
+//        genLawStatuteCsv();
+//        crawlInterpretation();
+
+//        genLawStatuteCsv();
+//        genInterpretationCsv();
+
+        LawItemFinder lf = new LawItemFinder();
+        String refFilePath = "D:\\OneDrive\\小法博科技\\产品\\类案推送\\民间借贷\\referLawCount-all.csv";
+        String statuteDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\law_dataset.csv";
+        String interDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\inter_dataset.csv";
+        String resFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\referLawCountWithContent100.csv";
+        lf.genRefFile(refFilePath, statuteDataFilePath, interDataFilePath, resFilePath, 100);
     }
 
     public static int crawlInterpretation() throws IOException {
@@ -142,9 +155,9 @@ public class LawStatuteCrawler {
         return 0;
     }
 
-    public static void gen4paraCsv() {
+    public static void genLawStatuteCsv() {
         LawStatuteAnalyzer analyzer = new LawStatuteAnalyzer();
-        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data");
+        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\法律");
         List fileList = analyzer.getFileList();
         StringBuilder csvString = new StringBuilder();
         for (int i = 0; i < fileList.size(); ++i) {
@@ -152,13 +165,44 @@ public class LawStatuteCrawler {
             LawStatute statute = analyzer.analyze(filePath);
             String name = analyzer.getName(filePath);
             for (int j = 0; j < statute.getItemList().size(); ++j) {
+                
                 String indexStr = name + "第" + (j + 1) + "条";
                 String content = statute.getItemList().get(j).getContent();
-                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
+//                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
+                csvString.append(name).append(",").append(j+1).append(",").append(content).append("\n");
             }
         }
 
-        try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\dataset.csv")) {
+        try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\law_dataset.csv")) {
+            out.println(csvString.toString());
+        } catch (FileNotFoundException e) {
+            System.err.println("Write to file error!");
+        }
+//        LawStatute statute = analyzer.analyze("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\民法商法\\中华人民共和国海商法.txt");
+//        for(int i = 0; i < statute.getItemList().size(); ++i){
+//            System.out.println("Item " + i + ": " + statute.getItemList().get(i).getContent());
+//        }
+    }
+    
+    public static void genInterpretationCsv() {
+        InterpretationAnalyzer analyzer = new InterpretationAnalyzer();
+        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\司法解释");
+        List fileList = analyzer.getFileList();
+        StringBuilder csvString = new StringBuilder();
+        for (int i = 0; i < fileList.size(); ++i) {
+            String filePath = (String) fileList.get(i);
+            Interpretation inter = analyzer.analyze(filePath);
+            String name = analyzer.getName(filePath);
+            for (int j = 0; j < inter.getItemList().size(); ++j) {
+                
+                String indexStr = name + "第" + (j + 1) + "条";
+                String content = inter.getItemList().get(j);
+//                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
+                csvString.append(name).append(",").append(j+1).append(",").append(content).append("\n");
+            }
+        }
+
+        try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\inter_dataset.csv")) {
             out.println(csvString.toString());
         } catch (FileNotFoundException e) {
             System.err.println("Write to file error!");
