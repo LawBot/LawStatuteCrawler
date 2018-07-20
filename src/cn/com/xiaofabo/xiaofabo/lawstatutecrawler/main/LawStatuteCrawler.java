@@ -38,12 +38,14 @@ public class LawStatuteCrawler {
 //        genLawStatuteCsv();
 //        genInterpretationCsv();
 
-        LawItemFinder lf = new LawItemFinder();
-        String refFilePath = "D:\\OneDrive\\小法博科技\\产品\\类案推送\\民间借贷\\referLawCount-all.csv";
-        String statuteDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\law_dataset.csv";
-        String interDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\inter_dataset.csv";
-        String resFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\referLawCountWithContent100.csv";
-        lf.genRefFile(refFilePath, statuteDataFilePath, interDataFilePath, resFilePath, 100);
+        genV5Format();
+//
+//        LawItemFinder lf = new LawItemFinder();
+//        String refFilePath = "D:\\OneDrive\\小法博科技\\产品\\类案推送\\民间借贷\\referLawCount-all.csv";
+//        String statuteDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\law_dataset.csv";
+//        String interDataFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\inter_dataset.csv";
+//        String resFilePath = "D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\referLawCountWithContent100.csv";
+//        lf.genRefFile(refFilePath, statuteDataFilePath, interDataFilePath, resFilePath, 100);
     }
 
     public static int crawlInterpretation() throws IOException {
@@ -165,11 +167,11 @@ public class LawStatuteCrawler {
             LawStatute statute = analyzer.analyze(filePath);
             String name = analyzer.getName(filePath);
             for (int j = 0; j < statute.getItemList().size(); ++j) {
-                
+
                 String indexStr = name + "第" + (j + 1) + "条";
                 String content = statute.getItemList().get(j).getContent();
 //                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
-                csvString.append(name).append(",").append(j+1).append(",").append(content).append("\n");
+                csvString.append(name).append(",").append(j + 1).append(",").append(content).append("\n");
             }
         }
 
@@ -183,7 +185,29 @@ public class LawStatuteCrawler {
 //            System.out.println("Item " + i + ": " + statute.getItemList().get(i).getContent());
 //        }
     }
-    
+
+    public static void genV5Format() {
+        LawStatuteAnalyzer analyzer = new LawStatuteAnalyzer();
+        analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\法律");
+        List fileList = analyzer.getFileList();
+        for (int i = 0; i < fileList.size(); ++i) {
+            StringBuilder sb = new StringBuilder();
+            String filePath = (String) fileList.get(i);
+            LawStatute statute = analyzer.analyze(filePath);
+            String name = analyzer.getName(filePath);
+            for (int j = 0; j < statute.getItemList().size(); ++j) {
+                String indexStr = "【" + (j + 1) + "】";
+                String content = statute.getItemList().get(j).getContent().trim();
+                sb.append(indexStr).append("\n").append(content).append("\n");
+            }
+            try (PrintWriter out = new PrintWriter("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\v5output\\" + name + ".txt")) {
+                out.println(sb.toString());
+            } catch (FileNotFoundException e) {
+                System.err.println("Write to file error!");
+            }
+        }
+    }
+
     public static void genInterpretationCsv() {
         InterpretationAnalyzer analyzer = new InterpretationAnalyzer();
         analyzer.getFileList("D:\\Code\\XiaoFaBo\\LawStatuteCrawler\\data\\司法解释");
@@ -194,11 +218,11 @@ public class LawStatuteCrawler {
             Interpretation inter = analyzer.analyze(filePath);
             String name = analyzer.getName(filePath);
             for (int j = 0; j < inter.getItemList().size(); ++j) {
-                
+
                 String indexStr = name + "第" + (j + 1) + "条";
                 String content = inter.getItemList().get(j);
 //                csvString.append(indexStr).append(";;;;;").append(content).append("\n");
-                csvString.append(name).append(",").append(j+1).append(",").append(content).append("\n");
+                csvString.append(name).append(",").append(j + 1).append(",").append(content).append("\n");
             }
         }
 
